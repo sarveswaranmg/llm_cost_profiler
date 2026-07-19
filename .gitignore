@@ -17,4 +17,10 @@ htmlcov/
 
 # dashboard (React/Vite) — added in a later part
 node_modules/
-dashboard/dist/
+# Keep dashboard/dist itself in git (via .gitkeep): pyproject.toml
+# force-includes it into the wheel, and hatchling errors if the path is
+# missing entirely. The general dist/ rule above would swallow it, so
+# re-include the directory before ignoring its build output.
+!dashboard/dist/
+dashboard/dist/*
+!dashboard/dist/.gitkeep

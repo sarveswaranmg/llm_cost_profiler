@@ -2,7 +2,8 @@
 
 create_app(storage_backend) wires the configured StorageBackend and the
 live-trace broadcaster into a FastAPI app, and serves the built React
-dashboard from / when dashboard/dist exists (a placeholder page otherwise).
+dashboard from / when a built dashboard is present (a placeholder page
+otherwise).
 Requires the `server` extra: pip install "tokenlens[server]".
 """
 
@@ -58,8 +59,10 @@ def default_dashboard_dist() -> Path:
     if env:
         return Path(env).expanduser()
     # Dev checkout: <root>/src/tokenlens/server/app.py → <root>/dashboard/dist.
+    # The directory exists even before a build (it holds a tracked .gitkeep),
+    # so require an actual build output.
     repo_dist = Path(__file__).resolve().parents[3] / "dashboard" / "dist"
-    if repo_dist.is_dir():
+    if (repo_dist / "index.html").is_file():
         return repo_dist
     # Installed wheel: the built dashboard ships inside the package.
     return Path(__file__).resolve().parent.parent / "_dashboard"
@@ -113,7 +116,7 @@ def create_app(
     app.include_router(routes.ws)
 
     dist = dashboard_dist if dashboard_dist is not None else default_dashboard_dist()
-    if dist.is_dir():
+    if (dist / "index.html").is_file():
         app.mount("/", StaticFiles(directory=dist, html=True), name="dashboard")
     else:
 
