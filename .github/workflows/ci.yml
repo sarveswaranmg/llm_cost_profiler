@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package with all extras
+        run: pip install -e ".[all,dev]"
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Check formatting with ruff
+        run: ruff format --check .
+
+      - name: Type-check with mypy
+        run: mypy src
+
+      # Unit + integration + the in-process CLI tests, gated at 85% line
+      # coverage of src/tokenlens. Only the slow uvicorn smoke test is
+      # excluded here — it runs in the e2e job below.
+      - name: Run tests with coverage
+        run: >
+          pytest -m "not slow"
+          --cov --cov-report=term-missing --cov-report=xml
+          --cov-fail-under=85
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package with all extras
+        run: pip install -e ".[all,dev]"
+
+      - name: Run e2e tests (demo → real server → CLI)
+        run: pytest -m e2e
+
+  dashboard-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Build dashboard
+        working-directory: dashboard
+        run: |
+          npm ci
+          npm run build
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install -e ".[all,dev]"
+
+      - name: Seed demo traces
+        run: python examples/demo_langgraph_agent.py
+        env:
+          TOKENLENS_DB_PATH: /tmp/smoke.db
+
+      - name: Smoke test server
+        env:
+          TOKENLENS_DB_PATH: /tmp/smoke.db
+        run: |
+          tokenlens server --port 8321 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8321/api/stats/overview > /dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8321/api/stats/overview | python -c "
+          import json, sys
+          d = json.load(sys.stdin)
+          assert d['trace_count'] >= 20, f'expected >=20 traces, got {d[\"trace_count\"]}'
+          assert float(d['total_cost_usd']) > 0, d
+          print('overview OK:', d['trace_count'], 'traces,', d['total_cost_usd'], 'USD')
+          "
+          curl -sf http://127.0.0.1:8321/ | grep -q tokenlens
+          echo "dashboard served OK"

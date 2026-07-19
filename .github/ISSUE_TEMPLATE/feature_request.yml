@@ -1,0 +1,37 @@
+name: Feature request
+description: An integration, metric, or view you're missing.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What question can't you answer today?
+      description: tokenlens is a cost profiler — frame the request as the cost/trace question you're trying to answer.
+      placeholder: |
+        I want to know how much of my spend is prompt-cache misses vs hits,
+        broken down per feature.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Rough sketch — API, CLI flag, dashboard view. Optional.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you've tried
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - instrumentation (LangChain/LangGraph/SDKs/other)
+        - cost & pricing
+        - storage
+        - API server
+        - dashboard
+        - CLI
+        - other
+    validations:
+      required: true

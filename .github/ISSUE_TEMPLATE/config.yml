@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question / discussion
+    url: https://github.com/tokenlens/tokenlens/discussions
+    about: For "how do I…" questions and ideas that aren't concrete requests yet.

@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* Design tokens — dark DevTools theme. The four chromatic kind hues
+   (llm/tool/retriever/retry) were validated as a set against --color-surface
+   with the data-viz palette checker (all-pairs CVD ΔE 9.9, normal-vision
+   16.3, contrast ≥ 3:1). Structural kinds are deliberately neutral grays. */
+@theme {
+  --color-page: #0d0d0d;
+  --color-surface: #141413;
+  --color-raised: #1e1e1c;
+  --color-hover: #26261f;
+
+  --color-ink: #f4f4f0;
+  --color-ink-2: #c3c2b7;
+  --color-muted: #898781;
+  --color-grid: #2c2c2a;
+  --color-hairline: rgba(255, 255, 255, 0.1);
+
+  --color-accent: #3987e5;
+
+  --color-llm: #256abf;
+  --color-tool: #9085e9;
+  --color-retriever: #1baf7a;
+  --color-embedding: #4cc39a;
+  --color-retry: #d03b3b;
+  --color-chain: #454541;
+  --color-graphnode: #605f58;
+  --color-custom: #77766e;
+
+  --color-good: #0ca30c;
+  --color-warn: #fab219;
+  --color-crit: #d03b3b;
+  --color-error-ring: #ff9a9a;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+    monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers that must align vertically (tables, lists, stat tiles). */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #33332f;
+  border-radius: 5px;
+  border: 2px solid var(--color-page);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes livepulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.live-dot {
+  animation: livepulse 2s ease-in-out infinite;
+}
+
+/* Retry bars in the HTML timeline: same stripes as the SVG pattern. */
+.retry-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #d03b3b 0,
+    #d03b3b 4px,
+    #932a2a 4px,
+    #932a2a 6px
+  );
+}

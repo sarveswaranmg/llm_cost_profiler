@@ -1,0 +1,40 @@
+name: Bug report
+description: Something broke — a crash, wrong costs, missing spans, a dashboard glitch.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+      placeholder: |
+        Wrapped my LangGraph agent with instrument_graph(), but parallel
+        nodes show up as separate traces instead of nesting under the root.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Smallest snippet that shows the problem. The demo agent (examples/demo_langgraph_agent.py) is a good starting point to modify.
+      render: python
+  - type: input
+    id: version
+    attributes:
+      label: tokenlens version
+      description: Output of `tokenlens version`.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "Python 3.12, macOS 15, langchain-core 0.3.x, storage: sqlite"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traceback
+      description: Any warnings from the `tokenlens.*` loggers are especially useful.
+      render: text
